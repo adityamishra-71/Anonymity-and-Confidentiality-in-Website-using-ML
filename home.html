@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishShield | Anonymity and Confidentiality in Website using Machine Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #6366F1;
+            --primary-dark: #4338CA;
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gray: #6B7280;
+            --light-gray: #E5E7EB;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--primary-dark);
+        }
+
+        .logo-icon {
+            font-size: 1.75rem;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.03) 0%, rgba(255, 255, 255, 1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Detection Box */
+        .detection-box {
+            background-color: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            border: 1px solid var(--light-gray);
+        }
+
+        .detection-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--dark);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .url-input-container {
+            position: relative;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: var(--transition);
+            padding-left: 3rem;
+            background-color: var(--light);
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            background-color: var(--white);
+        }
+
+        .url-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1.25rem;
+        }
+
+        .check-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        .check-btn:hover {
+            background: linear-gradient(to right, var(--primary-dark), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .check-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow);
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .spinner {
+            width: 3.5rem;
+            height: 3.5rem;
+            border: 4px solid rgba(79, 70, 229, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .result {
+            display: none;
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 12px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .result-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .result-text {
+            margin-bottom: 1.5rem;
+            color: var(--gray);
+        }
+
+        .result-details {
+            margin-top: 2rem;
+        }
+
+        .details-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .details-list {
+            list-style: none;
+            background-color: var(--light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .safe {
+            background-color: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--success);
+        }
+
+        .phishing {
+            background-color: rgba(239, 68, 68, 0.05);
+            border-left: 4px solid var(--danger);
+        }
+
+        .suspicious {
+            background-color: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--warning);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background-color: var(--white);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--light);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--light-gray);
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature-text {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            padding: 2rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 5rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-link {
+            margin-bottom: 1rem;
+        }
+
+        .footer-link a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-link a:hover {
+            color: var(--white);
+            padding-left: 5px;
+        }
+
+        .footer-link i {
+            font-size: 0.9rem;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .detection-box {
+                padding: 2rem 1.5rem;
+            }
+
+            .detection-title {
+                font-size: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 4rem 0;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .feature-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-shield-alt logo-icon"></i>
+                    <span>PhishShield</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">Home</a>
+                    <a href="/how-it-works" class="nav-link">How It Works</a>
+                    <a href="/about" class="nav-link">About</a>
+                    <a href="/contact" class="nav-link">Contact</a>
+                </div>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Anonymity and Confidentiality in Website using Machine Learning</h1>
+                <p class="hero-subtitle">Protect yourself from malicious websites with our advanced phishing detection technology. Scan any URL instantly to check for potential threats.</p>
+                
+                <div class="detection-box">
+                    <h2 class="detection-title">Check a Website</h2>
+                    
+                    <div class="input-group">
+                        <label for="url-input" class="input-label">Enter URL to analyze</label>
+                        <div class="url-input-container">
+                            <i class="fas fa-link url-icon"></i>
+                            <input type="url" id="url-input" class="url-input" placeholder="https://example.com" required>
+                        </div>
+                    </div>
+                    
+                    <button id="check-btn" class="check-btn">
+                        <i class="fas fa-search"></i>
+                        Analyze URL
+                    </button>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Scanning website for phishing indicators...</p>
+                    </div>
+                    
+                    <div class="result" id="result">
+                        <div class="result-header">
+                            <i class="fas fa-check-circle result-icon" id="result-icon"></i>
+                            <h3 class="result-title" id="result-title">Result</h3>
+                        </div>
+                        <p class="result-text" id="result-text"></p>
+                        <div class="result-details" id="result-details"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Advanced Protection Features</h2>
+            <p class="section-subtitle">Our system uses multiple detection methods to identify phishing attempts with high accuracy</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-globe feature-icon"></i>
+                    <h3 class="feature-title">URL Analysis</h3>
+                    <p class="feature-text">Examines URL structure for suspicious patterns, hidden characters, and known phishing techniques.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-database feature-icon"></i>
+                    <h3 class="feature-title">Threat Intelligence</h3>
+                    <p class="feature-text">Checks against constantly updated databases of known phishing sites and malicious domains.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <i class="fas fa-code feature-icon"></i>
+                    <h3 class="feature-title">Content Inspection</h3>
+                    <p class="feature-text">Analyzes page content for phishing indicators like fake login forms and suspicious scripts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">93.5%</div>
+                    <div class="stat-label">Detection Accuracy</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">10k</div>
+                    <div class="stat-label">URLs Analyzed</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Real-time Protection</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">100ms</div>
+                    <div class="stat-label">Average Scan Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>PhishShield</h3>
+                    <p class="footer-text">Advanced phishing detection technology to protect users from malicious websites and online scams.</p>
+                    <div class="social-links">
+                        <a href="https://x.com/search?q=phising%20website%20detection&src=typed_query" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="https://github.com/adityamishra-71/Anonymity-and-Confidentiality-in-Website-using-ML" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/aditya-mishra-a771201b6/" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.youtube.com/results?search_query=phising+website+detection" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li class="footer-link"><a href="https://www.phishtank.com/developer_info.php"><i class="fas fa-chevron-right"></i> Data Set</a></li>
+                        <li class="footer-link"><a href="/how-it-works"><i class="fas fa-chevron-right"></i> How It Works</a></li> <!-- Updated Link -->
+                        <li class="footer-link"><a href="https://flask.palletsprojects.com/en/stable/"><i class="fas fa-chevron-right"></i> Flask Documentation</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="https://www.sciencedirect.com/science/article/pii/S1319157823000034"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                        <li class="footer-link"><a href="https://github.com/adityamishra-71/Anonymity-and-Confidentiality-in-Website-using-ML/blob/main/Research_Paper_(Anonymity_and_Confidentiality_in_Website_using_ML_).pdf"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+                        <li class="footer-link"><a href="#"><i class="fas fa-chevron-right"></i> Support</a></li>
+                        <li class="footer-link"><a href="/about"><i class="fas fa-chevron-right"></i> About</a></li> <!-- Updated Link -->
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="/contact"><i class="fas fa-chevron-right"></i> Email Us</a></li>
+                        <li class="footer-link"><a href="/contact"><i class="fas fa-chevron-right"></i> Twitter</a></li>
+                        <li class="footer-link"><a href="/contact"><i class="fas fa-chevron-right"></i> GitHub</a></li>
+                        <li class="footer-link"><a href="/contact"><i class="fas fa-chevron-right"></i> Report Issue</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 PhishShield. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            // URL checking functionality
+            document.getElementById('check-btn').addEventListener('click', async function() {
+                const urlInput = document.getElementById('url-input').value.trim();
+                
+                if (!urlInput) {
+                    alert('Please enter a URL to check');
+                    return;
+                }
+                
+                // Validate URL format
+                try {
+                    new URL(urlInput);
+                } catch (e) {
+                    alert('Please enter a valid URL (e.g., https://example.com)');
+                    return;
+                }
+                
+                // Show loading indicator
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('result').style.display = 'none';
+                
+                try {
+                     // Call your Flask backend API
+                const response = await fetch('http://localhost:5001/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: urlInput })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const analysisResult = await response.json();
+                
+                // Display results
+                const resultDiv = document.getElementById('result');
+                const resultIcon = document.getElementById('result-icon');
+                const resultTitle = document.getElementById('result-title');
+                const resultText = document.getElementById('result-text');
+                const resultDetails = document.getElementById('result-details');
+                    
+                    // Set appropriate styling and icons
+                    if (analysisResult.isPhishing) {
+                        resultDiv.className = 'result phishing';
+                        resultIcon.className = 'fas fa-exclamation-triangle result-icon';
+                        resultTitle.textContent = 'Phishing Detected!';
+                    } else if (analysisResult.isSuspicious) {
+                        resultDiv.className = 'result suspicious';
+                        resultIcon.className = 'fas fa-question-circle result-icon';
+                        resultTitle.textContent = 'Suspicious Website';
+                    } else {
+                        resultDiv.className = 'result safe';
+                        resultIcon.className = 'fas fa-check-circle result-icon';
+                        resultTitle.textContent = 'Safe Website';
+                    }
+                    
+                    resultText.textContent = analysisResult.message;
+                    
+                    // Add detailed analysis if available
+                    if (analysisResult.details) {
+                        let detailsHtml = '<div class="details-title">Analysis Details</div><div class="details-list">';
+                        for (const [feature, value] of Object.entries(analysisResult.details)) {
+                            detailsHtml += `
+                                <div class="detail-item">
+                                    <span class="detail-label">${feature}</span>
+                                    <span class="detail-value">${value}</span>
+                                </div>
+                            `;
+                        }
+                        detailsHtml += '</div>';
+                        resultDetails.innerHTML = detailsHtml;
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                } catch (error) {
+                    alert('An error occurred while checking the URL. Please try again.');
+                    console.error('Error:', error);
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navLinks.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Responsive adjustments
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    navLinks.style.display = 'flex';
+                } else {
+                    navLinks.style.display = 'none';
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
+    </script>
+</body>
+</html>
